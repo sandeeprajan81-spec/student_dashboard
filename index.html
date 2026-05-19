@@ -520,6 +520,25 @@ button {
   box-shadow: 0 10px 25px rgba(0,0,0,0.12);
 }
 
+.greeting {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+.date-text {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeInUp 0.8s ease forwards;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 </style>
 
 </head>
@@ -528,11 +547,13 @@ button {
 
 <div class="home-container">
 
-  <div class="home-header">
-    <h1>Good Morning, Sandy 👋</h1>
-    <p>Welcome back to your dashboard</p>
-  </div>
-
+  
+    <div class="home-header">
+  <h1 id="greetingText"></h1>
+  <p id="dateText"></p>
+  <p>Welcome back to your dashboard</p>
+</div>
+    
   <!-- TILE GRID -->
   <div class="tile-grid">
 
@@ -879,6 +900,38 @@ if (sessionSelectEl) {
   });
 }
 
+function updateHomeHeader() {
+  const greetEl = document.getElementById("greetingText");
+  const dateEl = document.getElementById("dateText");
+
+  const hour = new Date().getHours();
+
+  let greeting = "Hello";
+
+  if (hour < 12) greeting = "Good Morning";
+  else if (hour < 18) greeting = "Good Afternoon";
+  else greeting = "Good Evening";
+
+  if (greetEl) {
+    greetEl.textContent = `${greeting}, Sandy 👋`;
+  } else {
+    console.log("greetingText not found");
+  }
+
+  if (dateEl) {
+    const today = new Date();
+
+    dateEl.textContent = today.toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric"
+    });
+  } else {
+    console.log("dateText not found");
+  }
+}
+
 async function loadStudentSessionView(first_name, last_name) {
 
   document.getElementById('sessionAddBtn').style.display = 'block';
@@ -1212,6 +1265,7 @@ function goHome() {
 
   // 🔥 refresh dashboard tiles
   refreshDashboard();
+  updateHomeHeader();
 }
 
 function closeSessionView() {
@@ -2521,6 +2575,10 @@ async function exportInvoice() {
 
   alert("Sessions exported to Google Sheet successfully!");
 }
+
+window.addEventListener("DOMContentLoaded", function () {
+  updateHomeHeader();
+});
 
 </script>
 
