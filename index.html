@@ -1,0 +1,2177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sandy SaaS Dashboard</title>
+<link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<script>
+const SUPABASE_URL = "https://fevsvidfkvmzbjywoicr.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_cMM32-TNPV-Ifwavdmvjiw_PMmIKKjQ";
+
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+const GOOGLE_CLIENT_ID = "883172980055-9uo9vqv6on6593reonva64ih6oa12pfd.apps.googleusercontent.com";
+</script>
+
+<style>
+
+.add-session-btn:active{
+  transform: scale(0.98);
+}
+:root{
+  --primary:#4f46e5;
+  --bg:#f6f7fb;
+  --text:#111827;
+}
+
+/* ================= BASE ================= */
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+  background:var(--bg);
+}
+
+/* ================= HERO ================= */
+.hero{
+  background:
+    linear-gradient(135deg, rgba(30,64,175,0.75), rgba(79,70,229,0.65)),
+    url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1600&q=80');
+  background-size:cover;
+  background-position:center;
+  padding:60px 20px 90px;
+  border-bottom-left-radius:30px;
+  border-bottom-right-radius:30px;
+  color:white;
+  position:relative;
+}
+
+/* ================= GLASS ================= */
+.glass-panel{
+  background:rgba(255,255,255,0.12);
+  backdrop-filter:blur(14px);
+  padding:20px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,0.25);
+  max-width:420px;
+  animation:fadeUp .5s ease;
+}
+
+.glass{
+  background:rgba(255,255,255,0.8);
+  backdrop-filter:blur(10px);
+  border-radius:18px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.08);
+  transition:.2s ease;
+}
+
+.glass:hover{
+  transform:translateY(-4px);
+}
+
+/* ================= KPI ================= */
+.kpi{
+  padding:15px;
+  text-align:center;
+}
+
+/* ================= SECTION ================= */
+.section{
+  margin-top:-0px;
+  padding:0 15px;
+}
+
+.hidden{display:none;}
+
+/* ================= TIMELINE ================= */
+.timeline{
+  position:relative;
+  margin-left:10px;
+}
+
+.timeline::before{
+  content:"";
+  position:absolute;
+  left:6px;
+  top:0;
+  bottom:0;
+  width:2px;
+  background:#ddd;
+}
+
+.item{
+  position:relative;
+  padding-left:25px;
+  margin-bottom:15px;
+  animation:fadeUp .3s ease;
+}
+
+.dot{
+  position:absolute;
+  left:0;
+  top:5px;
+  width:12px;
+  height:12px;
+  background:var(--primary);
+  border-radius:50%;
+}
+
+/* ================= FAB ================= */
+.fab{
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  width:55px;
+  height:55px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#4f46e5,#6d28d9);
+  color:white;
+  border:none;
+  font-size:28px;
+  box-shadow:0 10px 20px rgba(0,0,0,0.25);
+  display:none;
+}
+
+/* ================= ANIMATION ================= */
+@keyframes fadeUp{
+  from{opacity:0; transform:translateY(10px);}
+  to{opacity:1; transform:translateY(0);}
+}
+
+/* ================= MODERN KPI (BALANCED DARK GLASS) ================= */
+
+.kpi{
+  padding:16px;
+  border-radius:20px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+
+  /* slightly deeper glass (key change) */
+  background: rgba(255,255,255,0.62);
+
+  backdrop-filter: blur(18px);
+
+  box-shadow:
+    0 12px 35px rgba(0,0,0,0.10),
+    inset 0 1px 0 rgba(255,255,255,0.5);
+
+  transition: all 0.25s ease;
+}
+
+/* stronger but still soft tint layer */
+.kpi::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  opacity:0.30;
+  pointer-events:none;
+}
+
+/* Sessions (slightly deeper indigo) */
+.kpi-sessions::after{
+  background: linear-gradient(135deg,
+    rgba(79,70,229,0.45),
+    rgba(79,70,229,0.10));
+}
+
+/* Covered (richer green) */
+.kpi-covered::after{
+  background: linear-gradient(135deg,
+    rgba(16,185,129,0.45),
+    rgba(16,185,129,0.10));
+}
+
+/* Remaining (warmer amber) */
+.kpi-remaining::after{
+  background: linear-gradient(135deg,
+    rgba(245,158,11,0.45),
+    rgba(245,158,11,0.10));
+}
+
+/* hover refinement (slightly more lift) */
+.kpi:hover{
+  transform: translateY(-4px);
+  box-shadow:
+    0 16px 45px rgba(0,0,0,0.14),
+    inset 0 1px 0 rgba(255,255,255,0.6);
+}
+
+/* text stays sharp */
+.kpi small,
+.kpi h3{
+  position: relative;
+  z-index: 1;
+}
+
+.kpi h3{
+  font-size:28px;
+  font-weight:700;
+  margin:0;
+  color:#111827;
+}
+
+/* ICONS */
+.session-card{
+  border-radius:16px;
+}
+
+.row-line{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:6px 0;
+  font-size:14px;
+  color:#111827;
+}
+
+.icon-box i{
+  font-size:16px;
+}
+
+.icon-box{
+  width:26px;
+  height:26px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:8px;
+  background:rgba(79,70,229,0.10);
+  font-size:14px;
+}
+
+/* highlight duration */
+.highlight{
+  font-weight:600;
+}
+
+.highlight .icon-box{
+  background:rgba(16,185,129,0.12);
+}
+
+/* ================= ADD SESSION BUTTON ================= */
+.add-session-btn{
+  margin-top:12px;
+  padding:10px 18px;
+  border:none;
+  border-radius:14px;
+  font-size:14px;
+  font-weight:600;
+  color:white;
+  cursor:pointer;
+
+  display:inline-flex;
+  align-items:center;
+  justify-content:center; /* ✅ THIS centers text horizontally */
+  gap:8px;
+
+  /* 🔵 new modern color (blue → indigo gradient) */
+  background: linear-gradient(135deg, #14b8a6, #0ea5e9);
+
+  box-shadow:
+    0 10px 25px rgba(59,130,246,0.25),
+    inset 0 1px 0 rgba(255,255,255,0.2);
+
+  transition: all 0.25s ease;
+  position:relative;
+  overflow:hidden;
+}
+
+/* hover lift */
+.add-session-btn:hover{
+  transform: translateY(-3px);
+  box-shadow:
+    0 15px 35px rgba(59,130,246,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.25);
+}
+
+/* click effect */
+.add-session-btn:active{
+  transform: translateY(0px);
+  box-shadow:
+    0 8px 18px rgba(59,130,246,0.25);
+}
+
+/* subtle shine animation */
+.add-session-btn::after{
+  content:"";
+  position:absolute;
+  top:10;
+  left:-100%;
+  width:60%;
+  height:100%;
+  background: rgba(255,255,255,0.25);
+  transform: skewX(-20deg);
+  transition: 0.5s;
+}
+
+.add-session-btn:hover::after{
+  left:120%;
+}
+
+/* overlay */
+.session-modal{
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(8px);
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+/* card */
+.session-card{
+  width:360px;
+  background:rgba(255,255,255,0.85);
+  backdrop-filter: blur(20px);
+  border-radius:18px;
+  padding:22px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.25);
+  animation:pop .25s ease;
+}
+
+/* animation */
+@keyframes pop{
+  from{transform:scale(0.9); opacity:0;}
+  to{transform:scale(1); opacity:1;}
+}
+
+/* heading */
+.session-card h2{
+  margin:0 0 15px;
+  font-size:18px;
+  font-weight:700;
+  color:#0f172a;
+}
+
+/* inputs */
+.form-group{
+  display:flex;
+  flex-direction:column;
+  margin-bottom:12px;
+}
+
+.form-group label{
+  font-size:12px;
+  color:#64748b;
+  margin-bottom:5px;
+}
+
+.form-group input{
+  padding:10px 12px;
+  border-radius:10px;
+  border:1px solid #e2e8f0;
+  outline:none;
+  transition:0.2s;
+  font-size:14px;
+}
+
+.form-group input:focus{
+  border-color:#6366f1;
+  box-shadow:0 0 0 3px rgba(99,102,241,0.15);
+}
+
+/* buttons */
+.btn-row{
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+}
+
+.btn-primary{
+  flex:1;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:linear-gradient(135deg,#14b8a6,#0ea5e9);
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.btn-secondary{
+  flex:1;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:#e2e8f0;
+  color:#0f172a;
+  cursor:pointer;
+}
+
+@media (max-width: 768px){
+
+  /* make row behave like tight dashboard strip */
+  .kpi-scroll{
+    flex-wrap: nowrap;
+    gap:8px;
+  }
+
+  /* shrink cards */
+  .kpi-scroll .col-4,
+  .kpi-scroll .col-6,
+  .kpi-scroll .col-12{
+    flex: 1;
+    min-width: 0;
+  }
+
+  .kpi-scroll .glass.kpi{
+    padding:10px 8px;
+    border-radius:14px;
+  }
+
+  .kpi-scroll .kpi h3{
+    font-size:18px;
+    margin-top:4px;
+  }
+
+  .kpi-scroll .kpi small{
+    font-size:11px;
+    opacity:0.8;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= HOME ================= -->
+<div id="homeView">
+
+  <div class="hero">
+
+    <div class="glass-panel">
+      <h1 id="greeting"></h1>
+      <p>Your activity looks great today</p>
+    </div>
+
+  </div>
+
+  <div class="section">
+    <div class="row g-3">
+
+      <div class="col-6">
+        <div class="glass kpi" onclick="openSessions()">
+          <small>Sessions</small>
+          <h3 id="totalSessions">0</h3>
+        </div>
+      </div>
+
+      <div class="col-6">
+        <div class="glass kpi" onclick="openStudents()">
+          <small>Students</small>
+          <h3 id="totalStudents">0</h3>
+        </div>
+      </div>
+
+      <div class="col-6">
+        <div class="glass kpi" onclick="openBilling()">
+          <small>Billing</small>
+          <h3 id="totalBilling">0</h3>
+        </div>
+      </div>
+
+      <div class="col-6">
+        <div class="glass kpi">
+          <small>Schedule</small>
+          <h3>--</h3>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ================= SESSIONS ================= -->
+<div id="sessionsView" class="hidden">
+
+  <div class="hero" style="padding:25px;">
+  <div class="glass-panel">
+
+    <!-- SMALL GREETING (HOME BUTTON) -->
+    <div onclick="goHome()" 
+         id="sessionGreeting"
+         style="
+           font-size:13px;
+           opacity:0.9;
+           margin-bottom:5px;
+           cursor:pointer;
+         ">
+    </div>
+
+    <h2 style="margin:0;">Sessions Overview</h2>
+
+  </div>
+</div>
+
+  <!-- ================= SESSIONS BODY (HIDDEN UNTIL STUDENT SELECTED) ================= -->
+<div class="section" id="sessionsBody">
+
+  <!-- STUDENT DROPDOWN -->
+  <select id="studentSelect"
+          class="form-select mb-3"
+          onchange="onStudentChange()">
+    <option value="">Select Student</option>
+  </select>
+
+  <!-- SUMMARY -->
+  <div id="sessionContent" class="hidden">
+  <div class="row g-2 mb-3">
+
+    <div class="col-4">
+  <div class="glass kpi kpi-sessions">
+    <small>Sessions</small>
+    <h3 id="sumCount">0</h3>
+  </div>
+</div>
+
+<div class="col-4">
+  <div class="glass kpi kpi-covered">
+    <small>Covered</small>
+    <h3 id="sumCovered">00:00</h3>
+  </div>
+</div>
+
+<div class="col-4">
+  <div class="glass kpi kpi-remaining">
+    <small>Remaining</small>
+    <h3 id="sumRemaining">10:00</h3>
+  </div>
+</div>
+    <button class="add-session-btn" onclick="openSessionForm()">
+      <i class="ri-add-line"></i>
+      Add Session
+    </button>
+  </div>
+
+  <!-- TIMELINE -->
+   
+  <div class="timeline" id="sessionList"></div>
+</div>
+</div>
+</div>
+<!-- ================= STUDENTS ================= -->
+<div id="studentsView" class="hidden">
+
+  <div class="hero" style="padding:25px;">
+  <div class="glass-panel">
+
+    <!-- SMALL GREETING (HOME BUTTON) -->
+    <div onclick="goHome()" 
+         id="studentsGreeting"
+         style="
+           font-size:13px;
+           opacity:0.9;
+           margin-bottom:5px;
+           cursor:pointer;
+         ">
+    </div>
+
+    <h2 style="margin:0;">Students Overview</h2>
+
+
+  </div>
+  
+</div>
+<!-- FULL WIDTH ACTION BAR -->
+
+  <button class="add-session-btn" onclick="openAddStudentForm()" style="
+    width:100%;
+  ">
+    <i class="ri-user-add-line"></i>
+    Add Student
+  </button>
+
+<div class="section mt-3">
+
+  <div class="row g-3 kpi-scroll">
+
+    <div class="col-12 col-md-4">
+      <div class="glass kpi kpi-sessions" onclick="showLowHourStudents()">
+        <small>Less than 2 Hours</small>
+        <h3 id="less2hrs">0</h3>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+        <div class="glass kpi kpi-covered" onclick="showInactiveStudents()">
+          <small>Non Active Students</small>
+          <h3 id="inactiveStudents">0</h3>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+      <div class="glass kpi kpi-remaining" onclick="showExpiringStudents()">
+        <small>Expiring < 60 Days</small>
+        <h3 id="expiringSoon">0</h3>
+      </div>
+    </div>
+    </div>
+      </div>  <!-- end row g-3 -->
+
+
+  <div id="lowHourList" class="mt-3"></div>
+  <div id="inactiveList" class="mt-3"></div>
+  <div id="expiringListView" class="hidden mt-4">
+</div>
+  
+
+  <div id="expiringList"></div>
+
+</div>
+  </div>
+
+</div>
+<!-- ================= BILLING ================= -->
+<div id="billingView" class="hidden">
+
+  <!-- HEADER -->
+  <div class="hero" style="padding:25px;">
+    <div class="glass-panel">
+
+      <div onclick="goHome()" 
+           id="billingGreeting"
+           style="font-size:13px; opacity:0.9; cursor:pointer;">
+      </div>
+
+      <h2 style="margin:0;">Billing Overview</h2>
+
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+<div class="section mt-3">
+
+  <!-- KPI ROW -->
+  <div class="row g-3">
+
+    <!-- TOTAL INCOME -->
+    <div class="col-6">
+      <div class="glass kpi kpi-covered">
+        <small>Total Income</small>
+        <h3 id="totalIncome">$0</h3>
+      </div>
+    </div>
+
+    <!-- TOTAL SESSIONS -->
+    <div class="col-6">
+      <div class="glass kpi kpi-sessions">
+        <small>Total Sessions</small>
+        <h3 id="totalSessionsBilling">0</h3>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BILLING PERIOD DROPDOWN -->
+  <div class="mt-3">
+    <label style="font-size:12px; opacity:0.7;">Billing Period</label>
+
+    <select id="billingPeriodSelect"
+            class="form-select"
+            onchange="onBillingPeriodChange()">
+
+      <option value="">Select Billing Period</option>
+
+    </select>
+  </div>
+
+  <!-- RESULTS AREA -->
+  <div id="billingStudentsList" class="mt-4"></div>
+
+</div>
+
+<!-- ================= SCHEDULE PAGE ================= -->
+<div id="scheduleView" class="hidden">
+
+  <!-- HEADER -->
+  <div class="hero" style="padding:25px;">
+    <div class="glass-panel">
+
+      <div onclick="goHome()" 
+           id="scheduleGreeting"
+           style="font-size:13px; opacity:0.9; cursor:pointer;">
+      </div>
+
+      <h2 style="margin:0;">Schedule</h2>
+
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="section mt-3">
+
+    <!-- KPI ROW -->
+    <div class="row g-3">
+
+      <div class="col-6">
+        <div class="glass kpi kpi-sessions">
+          <small>Today Sessions</small>
+          <h3 id="todaySessions">0</h3>
+        </div>
+      </div>
+
+      <div class="col-6">
+        <div class="glass kpi kpi-covered">
+          <small>This Week</small>
+          <h3 id="weekSessions">0</h3>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CONNECT GOOGLE BUTTON -->
+    <div class="mt-3">
+      <button class="add-session-btn w-100" onclick="connectGoogleCalendar()">
+        <i class="ri-google-line"></i>
+        Connect Google Calendar
+      </button>
+    </div>
+
+    <!-- EVENTS LIST -->
+    <div id="scheduleList" class="mt-4"></div>
+
+  </div>
+</div>
+<script>
+
+/* ================= STATE ================= */
+let selectedStudent=null;
+let sessions=[];
+let currentEditId = null;
+
+window.editSession = editSession;
+window.saveEdit = saveEdit;
+
+
+let students=[
+  {id:1,name:"John Doe"},
+  {id:2,name:"Emma Smith"}
+];
+
+/* ================= INIT ================= */
+init();
+
+function init(){
+  greet();
+  updateSessionGreeting();
+  updateStudentsGreeting();
+  updateHome();
+  
+}
+
+
+/* ================= GREETING ================= */
+function greet(){
+  let h=new Date().getHours();
+  let name="Sandy";
+
+  let g =
+    h<12?"Good morning":
+    h<17?"Good afternoon":
+    h<21?"Good evening":"Good night";
+
+  document.getElementById("greeting").innerText=`${g}, ${name}`;
+}
+
+/* ================= HOME ================= */
+async function updateHome(){
+
+  // ================= SESSIONS COUNT =================
+  const { count: sessionCount, error: sessionError } = await supabaseClient
+    .from('sessions')
+    .select('*', { count: 'exact', head: true });
+
+  document.getElementById("totalSessions").innerText =
+    sessionError ? 0 : sessionCount;
+
+
+  // ================= STUDENTS COUNT =================
+  const { count: studentCount, error: studentError } = await supabaseClient
+    .from('students')
+    .select('*', { count: 'exact', head: true });
+
+  document.getElementById("totalStudents").innerText =
+    studentError ? 0 : studentCount;
+
+  // ================= BILLING COUNT (SAFE BLOCK) =================
+  try {
+
+  const today = new Date();
+
+  let startDate, endDate;
+
+  if (today.getDate() >= 20) {
+    startDate = new Date(today.getFullYear(), today.getMonth(), 20);
+    endDate = new Date(today.getFullYear(), today.getMonth() + 1, 19);
+  } else {
+    startDate = new Date(today.getFullYear(), today.getMonth() - 1, 20);
+    endDate = new Date(today.getFullYear(), today.getMonth(), 19);
+  }
+
+  // Convert to ISO strings (IMPORTANT FIX)
+  const startISO = startDate.toISOString();
+  const endISO = endDate.toISOString();
+
+  const { data, error } = await supabaseClient
+    .from('sessions')
+    .select('id, session_date')
+    .gte('session_date', startISO)
+    .lte('session_date', endISO);
+
+  if (error) throw error;
+
+  document.getElementById("totalBilling").innerText =
+    data?.length || 0;
+
+} catch (err) {
+  console.log("Billing error:", err);
+  document.getElementById("totalBilling").innerText = 0;
+}
+}
+
+// Update greeting text for Sessions page header (acts as Home navigation button)
+function updateSessionGreeting(){
+  let h=new Date().getHours();
+  let name="Sandy";
+
+  let g =
+    h<12?"Good morning":
+    h<17?"Good afternoon":
+    h<21?"Good evening":"Good night";
+
+  let el=document.getElementById("sessionGreeting");
+  if(el){
+    el.innerText=`${g}, ${name}`;
+  }
+}
+
+/* ================= HOME NAV ================= */
+function goHome(){
+
+  clearStudentLists();
+
+  // hide all pages
+  document.getElementById("studentsView").classList.add("hidden");
+  document.getElementById("sessionsView").classList.add("hidden");
+  document.getElementById("billingView").classList.add("hidden");
+  document.getElementById("scheduleView").classList.add("hidden");
+
+  // show home
+  document.getElementById("homeView").classList.remove("hidden");
+
+  // refresh dashboard data
+  refreshDashboard();
+}
+
+/* ================= NAV TO SESSIONS ================= */
+function openSessions(){
+  document.getElementById("homeView").classList.add("hidden");
+  document.getElementById("sessionsView").classList.remove("hidden");
+
+  selectedStudent = null;
+  document.getElementById("sessionContent").classList.add("hidden");
+
+  loadStudents(); // 🔥 REQUIRED
+}
+
+/* ================= NAV TO STUDENTS ================= */
+function openStudents(){
+  
+  document.getElementById("homeView").classList.add("hidden");
+  document.getElementById("sessionsView").classList.add("hidden");
+  document.getElementById("studentsView").classList.remove("hidden");
+
+  updateStudentsGreeting();
+  loadStudentAnalytics();
+    // ✅ RESET EXPIRING SECTION STATE
+  const expiringView = document.getElementById("expiringListView");
+  const expiringList = document.getElementById("expiringList");
+
+  if(expiringView) expiringView.classList.add("hidden");
+  if(expiringList) expiringList.innerHTML = "";
+}
+
+/* ================= NAV TO BILLING ================= */
+function openBilling(){
+
+  document.getElementById("homeView").classList.add("hidden");
+  document.getElementById("sessionsView").classList.add("hidden");
+  document.getElementById("studentsView").classList.add("hidden");
+  document.getElementById("billingView").classList.remove("hidden");
+
+  updateBillingGreeting();
+  //loadBillingData();
+  loadBillingPeriods();
+}
+
+/* ================= NAV TO SCHEDULE ================= */
+function openSchedule(){
+  document.getElementById("homeView").classList.add("hidden");
+  document.getElementById("scheduleView").classList.remove("hidden");
+}
+
+/* ================= STUDENT SELECT HANDLER ================= */
+function onStudentChange(){
+
+  const studentId = document.getElementById("studentSelect").value;
+
+  if(!studentId){
+    document.getElementById("sessionContent").classList.add("hidden");
+    document.getElementById("sessionList").innerHTML = "";
+    return;
+  }
+
+  selectedStudent = studentId;
+
+  document.getElementById("sessionContent").classList.remove("hidden");
+
+  loadSummary(studentId);
+  loadSessions(studentId);
+}
+
+/* ================= LOAD SUMMARY================= */
+async function loadSummary(studentId){
+
+  const { data, error } = await supabaseClient
+    .from('sessions')
+    .select('*')
+    .eq('student_id', studentId);
+
+  if(error || !data){
+    return;
+  }
+
+  renderSummary(data);
+}
+
+/* ================= LOAD STUDENTS INTO DROPDOWN ================= */
+async function loadStudents(){
+
+  console.log("Loading students...");
+
+  const sel = document.getElementById("studentSelect");
+
+  if(!sel){
+    console.log("❌ studentSelect not found");
+    return;
+  }
+
+  sel.innerHTML = `<option value="">Loading students...</option>`;
+
+  const { data, error } = await supabaseClient
+    .from('students')
+    .select('student_id, first_name, last_name')
+    .order('first_name', { ascending: true });
+
+  console.log("Students data:", data);
+  console.log("Students error:", error);
+
+  if(error){
+    sel.innerHTML = `<option value="">Error loading students</option>`;
+    return;
+  }
+
+  if(!data || data.length === 0){
+    sel.innerHTML = `<option value="">No students found</option>`;
+    return;
+  }
+
+  let options = `<option value="">Select Student</option>`;
+
+  for(let i = 0; i < data.length; i++){
+    const s = data[i];
+    options += `
+      <option value="${s.student_id}">
+        ${s.first_name} ${s.last_name}
+      </option>
+    `;
+  }
+
+  sel.innerHTML = options;
+
+  console.log("Students dropdown loaded");
+}
+
+/* ================= UPDATE SUMMARY CARDS ================= */
+function renderSummary(sessions = []){
+
+  const count = sessions.length;
+
+  let totalMinutes = 0;
+
+  sessions.forEach(s => {
+    totalMinutes += (s.minutes || 0);
+  });
+
+  document.getElementById("sumCount").innerText = count;
+  document.getElementById("sumCovered").innerText = format(totalMinutes);
+
+  const remaining = Math.max(0, 600 - totalMinutes);
+  document.getElementById("sumRemaining").innerText = format(remaining);
+}
+
+/* ================= LOAD SESSIONS ================= */
+async function loadSessions(studentId){
+
+  const { data, error } = await supabaseClient
+    .from("sessions")
+    .select("id, student_id, session_number, session_date, start_time, end_time, minutes")
+    .eq("student_id", studentId)
+    .order("id", { ascending: false });
+
+  if(error){
+    console.log(error);
+    return;
+  }
+
+  renderSessions(data || []);
+}
+
+/* =================RENDER SESSIONS ================= */
+function renderSessions(list){
+
+  console.log("RENDERING LIST:", list);
+
+  let html = ""; // ✅ MUST be first
+  let safeList = Array.isArray(list) ? list : [];
+
+    safeList = safeList
+      .filter(s => s && s.id != null)
+      .sort((a, b) => {
+        const d1 = Date.parse(a.session_date || "");
+        const d2 = Date.parse(b.session_date || "");
+        return (d2 || 0) - (d1 || 0);
+      });
+
+  safeList.forEach(s => {
+    html += `
+      <div class="item">
+        <div class="dot"></div>
+        <div class="glass p-3">
+          <div class="row-line">
+        <span class="icon-box">
+          <i class="ri-calendar-line"></i>
+        </span>
+        <span class="text-primary">${formatDateDMY(s.session_date)}</span>
+      </div>
+
+      <div class="row-line">
+        <span class="icon-box">🕒</span>
+        <span>${toAMPM(s.start_time)} → ${toAMPM(s.end_time)}</span>
+      </div>
+
+      <div class="row-line">
+        <span class="icon-box">#</span>
+        <span>Session ${s.session_number || "-"}</span>
+      </div>
+          <div class="row-line highlight">
+            <span class="icon-box">⏱</span>
+            <span>${format(Number(s.minutes) || 0)}</span>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 mt-2">
+
+            <button class="btn btn-sm btn-light"
+              onclick="editSession(${s.id})">
+              ✏️
+            </button>
+
+            <button class="btn btn-sm btn-light"
+              onclick="deleteSession(${s.id})">
+                🗑️
+            </button>
+
+          </div>
+      </div>
+    </div>
+    `;
+  });
+
+  console.log("FINAL HTML:", html);
+
+  const el = document.getElementById("sessionList");
+  console.log("TARGET ELEMENT:", el);
+
+  if(!el){
+    console.error("sessionList container missing");
+    return;
+  }
+
+  el.innerHTML = html;
+}
+
+
+/* ================= UPDATE STUDENTS GREETING ================= */
+function updateStudentsGreeting(){
+  let h = new Date().getHours();
+  let name = "Sandy";
+
+  let g =
+    h < 12 ? "Good morning" :
+    h < 17 ? "Good afternoon" :
+    h < 21 ? "Good evening" : "Good night";
+
+  let el = document.getElementById("studentsGreeting");
+  if(el){
+    el.innerText = `${g}, ${name}`;
+  }
+}
+
+/* ================= UPDATE BILLING GREETING ================= */
+function updateBillingGreeting(){
+  let h = new Date().getHours();
+  let name = "Sandy";
+
+  let g =
+    h < 12 ? "Good morning" :
+    h < 17 ? "Good afternoon" :
+    h < 21 ? "Good evening" : "Good night";
+
+  const el = document.getElementById("billingGreeting");
+  if(el){
+    el.innerText = `${g}, ${name}`;
+  }
+}
+
+/* ================= LOAD STUDENT ANALYTICS ================= */
+async function loadStudentAnalytics(){
+
+  // 1. Get all students
+  const { data: students } = await supabaseClient
+    .from("students")
+    .select("student_id, date_enrolled");
+
+  // 2. Get all sessions
+  const { data: sessions } = await supabaseClient
+    .from("sessions")
+    .select("student_id, minutes");
+
+  if(!students) return;
+
+  // map student → total minutes
+  const sessionMap = {};
+
+    sessions?.forEach(s => {
+      const min = safeMinutes(s.minutes);
+
+      sessionMap[s.student_id] =
+        (sessionMap[s.student_id] || 0) + min;
+    });
+
+  let less2hrs = 0;
+  let inactive = 0;
+  let expiringSoon = 0;
+
+  const now = new Date();
+
+        const TOTAL_MIN = 600;
+
+      students.forEach(st => {
+
+        const totalMin = sessionMap[st.student_id] || 0;
+        const remaining = TOTAL_MIN - totalMin;
+
+        if (remaining > 0 && remaining <= 120) {
+          less2hrs++;
+        }
+
+      
+
+    // 2. inactive
+    if(!sessionMap[st.student_id]) inactive++;
+
+    // 3. expiry check
+    if(st.date_enrolled){
+
+      const enrollDate = new Date(st.date_enrolled);
+      const expiryDate = new Date(enrollDate);
+      expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+
+      const diffDays =
+        (expiryDate - now) / (1000 * 60 * 60 * 24);
+
+      if(diffDays <= 60 && diffDays >= 0){
+        expiringSoon++;
+      }
+    }
+  });
+
+  document.getElementById("less2hrs").innerText = less2hrs;
+  document.getElementById("inactiveStudents").innerText = inactive;
+  document.getElementById("expiringSoon").innerText = expiringSoon;
+}
+
+/* ================= CLEAR STUDENT LISTS ================= */
+function clearStudentLists(){
+
+  const containers = [
+    "expiringList",
+    "lowHourList",
+    "inactiveList"
+  ];
+
+  containers.forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.innerHTML = "";
+  });
+
+  // also hide all views (important UX fix)
+  const expiringView = document.getElementById("expiringListView");
+
+  if(expiringView) expiringView.classList.add("hidden");
+}
+
+/* ================= SHOW EXPIRING STUDENTS ================= */
+async function showExpiringStudents(){
+
+  clearStudentLists();
+  document.getElementById("expiringListView").classList.remove("hidden");
+
+  const { data: students, error: studentError } = await supabaseClient
+    .from("students")
+    .select("student_id, first_name, last_name, date_enrolled");
+
+  const { data: sessions } = await supabaseClient
+    .from("sessions")
+    .select("student_id, minutes");
+
+  if(studentError || !students){
+    console.log("Student fetch error:", studentError);
+    return;
+  }
+
+  let html = "";
+  const now = new Date();
+
+  students.forEach(st => {
+    console.log("RAW DATE:", st.date_enrolled);
+
+    if(!st.date_enrolled) return;
+
+    // ================= SAFE DATE PARSING =================
+const rawDate = st.date_enrolled;
+
+if(!rawDate) return;
+
+// detect format
+let enroll;
+
+if(rawDate.includes("-")){
+  // OLD FORMAT: 25-Aug-25
+  const [dd, mon, yy] = rawDate.split("-");
+  const months = {
+    Jan:0, Feb:1, Mar:2, Apr:3, May:4, Jun:5,
+    Jul:6, Aug:7, Sep:8, Oct:9, Nov:10, Dec:11
+  };
+  enroll = new Date(2000 + Number(yy), months[mon], Number(dd));
+}
+else {
+  // NEW FORMAT: 25 Aug 2025
+  enroll = new Date(rawDate);
+}
+
+if(isNaN(enroll.getTime())) return;
+
+    // ================= EXPIRY =================
+    const expiry = new Date(enroll);
+    expiry.setFullYear(expiry.getFullYear() + 1);
+
+    const daysLeft =
+      (expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+
+    // ================= FILTER =================
+    if(daysLeft > 60 || daysLeft < 0) return;
+
+    // ================= SESSION CALC =================
+    const studentSessions =
+      sessions?.filter(s => s.student_id === st.student_id) || [];
+
+    const sessionCount = studentSessions.length;
+
+    const totalMinutes =
+      studentSessions.reduce((sum, s) => sum + (s.minutes || 0), 0);
+
+    const remainingMinutes = Math.max(0, 600 - totalMinutes);
+
+    // ================= CARD =================
+    html += `
+  <div class="glass p-3 mb-2">
+
+    <div class="d-flex justify-content-between align-items-start">
+
+      <div>
+        <div style="font-weight:600; font-size:16px;">
+          ${st.first_name} ${st.last_name}
+        </div>
+
+        <div style="font-size:13px; opacity:0.75;">
+          Enrolled: ${st.date_enrolled}
+        </div>
+      </div>
+
+      <span style="
+        background:#ef4444;
+        color:white;
+        padding:4px 10px;
+        border-radius:8px;
+        font-size:12px;
+        font-weight:600;
+      ">
+        Expiring in ${Math.ceil(daysLeft)} days 
+      </span>
+
+    </div>
+
+    <hr style="margin:10px 0; opacity:0.15;">
+
+    <div class="row-line">
+      <span class="icon-box">📊</span>
+      <span>Sessions: <b>${sessionCount}</b></span>
+    </div>
+
+    <div class="row-line">
+      <span class="icon-box">⏳</span>
+      <span>Remaining: <b>${format(remainingMinutes)}</b></span>
+    </div>
+
+    <div class="row-line">
+      <span class="icon-box">📅</span>
+      <span>Expiry: <b>
+        ${String(expiry.getDate()).padStart(2,'0')}
+        ${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][expiry.getMonth()]}
+        ${expiry.getFullYear()}
+      </b></span>
+    </div>
+
+  </div>
+`;
+  });
+
+  const el = document.getElementById("expiringList");
+
+  if(!el){
+    console.log("expiringList container missing");
+    return;
+  }
+
+  el.innerHTML = html || "<p class='text-muted'>No expiring students</p>";
+}
+
+/* ================= LOAD BILLING DATA ================= */
+async function loadBillingData(startDate, endDate){
+
+  try {
+
+    // 1. FETCH SESSIONS
+    const { data: sessions, error } = await supabaseClient
+      .from("sessions")
+      .select("id, student_id, session_date, session_number, minutes");
+
+    if(error){
+      console.log("Billing fetch error:", error);
+      return;
+    }
+
+    // 2. FETCH STUDENTS (👉 THIS WAS MISSING / INCOMPLETE BEFORE)
+    const { data: students, error: studentError } = await supabaseClient
+      .from("students")
+      .select("student_id, first_name, last_name");
+
+    if(studentError){
+      console.log("Student fetch error:", studentError);
+      return;
+    }
+
+    // 3. FILTER SESSIONS BY BILLING PERIOD
+    const filtered = (sessions || []).filter(s => {
+
+      if(!s.session_date) return false;
+
+      const d = new Date(s.session_date);
+
+      return d >= startDate && d <= endDate;
+    });
+
+    // 4. CALCULATIONS
+    const sessionCount = filtered.length;
+    const totalIncome = sessionCount * 35;
+
+    // 5. UPDATE KPIs
+    document.getElementById("totalSessionsBilling").innerText = sessionCount;
+    document.getElementById("totalIncome").innerText = `$${totalIncome}`;
+
+    // 6. BUILD STUDENT BREAKDOWN
+    buildBillingStudentList(filtered, students || []);
+
+  } catch (err) {
+    console.log("Billing error:", err);
+  }
+}
+
+
+/* ================= STUDENT BILLING BREAKDOWN (WITH NAMES) ================= */
+function buildBillingStudentList(sessions, students){
+
+  const container = document.getElementById("billingStudentsList");
+
+  if(!container) return;
+
+  // create lookup map: student_id → full name
+  const studentMap = {};
+
+  students.forEach(s => {
+    studentMap[s.student_id] = `${s.first_name} ${s.last_name}`;
+  });
+
+  // group sessions
+  const map = {};
+
+  sessions.forEach(s => {
+
+    if(!map[s.student_id]){
+      map[s.student_id] = {
+        count: 0,
+        sessions: []
+      };
+    }
+
+    map[s.student_id].count += 1;
+    map[s.student_id].sessions.push(s.session_number);
+  });
+
+  let html = "";
+
+  Object.keys(map).forEach(studentId => {
+
+    const data = map[studentId];
+
+    const name = studentMap[studentId] || "Unknown Student";
+
+    html += `
+      <div class="glass p-3 mb-2">
+
+        <div style="font-weight:600; font-size:15px;">
+          ${name}
+        </div>
+
+        <div class="row-line">
+          <span>Sessions this cycle: <b>${data.count}</b></span>
+        </div>
+
+        <div class="row-line">
+          <span>Session numbers: <b>${data.sessions.join(", ")}</b></span>
+        </div>
+
+      </div>
+    `;
+  });
+
+  container.innerHTML = html || "<p>No sessions in this billing period</p>";
+}
+
+/* ================= MODAL ================= */
+function openModal(){
+  new bootstrap.Modal(document.getElementById("modal")).show();
+}
+
+/* ================= EDIT SESSION ================= */
+async function editSession(id) {
+
+  console.log("EDIT CLICKED ID:", id);
+
+  if (!id) {
+    console.error("❌ Invalid ID passed to editSession");
+    return;
+  }
+
+  currentEditId = id;
+
+  const { data, error } = await supabaseClient
+    .from('sessions')
+    .select('id, session_date, start_time, end_time')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    console.log("FETCH ERROR:", error);
+    return;
+  }
+
+  document.getElementById('editDate').value = data.session_date || '';
+  document.getElementById('editStart').value = data.start_time || '';
+  document.getElementById('editEnd').value = data.end_time || '';
+
+  document.getElementById('editModal').style.display = 'flex';
+}
+
+
+/* ================= SAVE SESSION ================= */
+async function saveEdit() {
+
+  console.log("SAVE CLICKED");
+  console.log("CURRENT EDIT ID:", currentEditId);
+
+  if (!currentEditId) {
+    alert("No session selected for update");
+    return;
+  }
+
+  const session_date = document.getElementById('editDate').value;
+  const start_time = document.getElementById('editStart').value;
+  const end_time = document.getElementById('editEnd').value;
+
+  const { error } = await supabaseClient
+    .from('sessions')
+    .update({
+      session_date,
+      start_time,
+      end_time
+    })
+    .eq('id', currentEditId);
+
+  if (error) {
+    console.log("UPDATE ERROR:", error);
+    return;
+  }
+
+  document.getElementById('editModal').style.display = 'none';
+
+  console.log("UPDATE SUCCESS");
+
+  // refresh UI safely
+  await refreshDashboard?.();
+}
+
+// open modal
+function openSessionForm(){
+  document.getElementById("sessionForm").style.display = "flex";
+    // optional reset every time modal opens
+  document.getElementById("sessionDate").value = "";
+  document.getElementById("startTime").value = "";
+  document.getElementById("endTime").value = "";
+}
+
+// close modal
+function closeSessionForm(){
+  const el = document.getElementById("sessionForm");
+  if(!el) return;
+  el.style.display = "none";
+    // ✅ reset form fields
+  document.getElementById("sessionDate").value = "";
+  document.getElementById("startTime").value = "";
+  document.getElementById("endTime").value = "";
+}
+
+// create session card
+function submitSession(){
+  alert("Save button clicked");
+}
+
+/* ================= SUBMIT SESSION ================= */
+async function submitSession(){
+
+  // 1. Get form values
+  const session_date = document.getElementById("sessionDate").value;
+  const start_time = document.getElementById("startTime").value;
+  const end_time = document.getElementById("endTime").value;
+
+  if(!session_date){
+    alert("Please select a date");
+    return;
+  }
+
+  if(!selectedStudent){
+    alert("Please select a student first");
+    return;
+  }
+
+  // 2. Get existing sessions for session_number calculation
+  const { data: existing, error: fetchError } = await supabaseClient
+    .from("sessions")
+    .select("session_number")
+    .eq("student_id", selectedStudent);
+
+  if(fetchError){
+    console.log(fetchError);
+    return;
+  }
+
+  let session_number = 1;
+
+  if(existing && existing.length > 0){
+
+    const nums = existing
+      .map(s => parseInt(s.session_number))
+      .filter(n => !isNaN(n));
+
+    session_number = nums.length > 0 ? Math.max(...nums) + 1 : 1;
+  }
+
+  // 3. INSERT into Supabase
+  const { data, error } = await supabaseClient
+    .from("sessions")
+    .insert([{
+      student_id: selectedStudent,
+      session_number,
+      session_date,
+      start_time: start_time || null,
+      end_time: end_time || null
+    }])
+    .select();
+
+  if(error){
+    console.log("INSERT ERROR:", error);
+    return;
+  }
+
+  console.log("SESSION ADDED:", data);
+
+  // 4. Close modal
+  closeSessionForm();
+
+  // 5. Refresh UI (VERY IMPORTANT)
+  loadSummary(selectedStudent);
+  loadSessions(selectedStudent);
+}
+
+/* ================= DELETE SESSION ================= */
+async function deleteSession(id){
+
+  // safety check
+  if(!id){
+    console.log("No session id provided");
+    return;
+  }
+
+  // confirm before delete
+  const ok = confirm("Are you sure you want to delete this session?");
+  if(!ok) return;
+
+  // delete from Supabase
+  const { error } = await supabaseClient
+    .from("sessions")
+    .delete()
+    .eq("id", id);
+
+  if(error){
+    console.log("DELETE ERROR:", error);
+    return;
+  }
+
+  console.log("SESSION DELETED:", id);
+
+  // refresh UI
+  loadSummary(selectedStudent);
+  loadSessions(selectedStudent);
+}
+
+/* ================= LOW HOURS STUDENTS (CLEAN VERSION) ================= */
+async function showLowHourStudents(){
+  clearStudentLists();
+
+  console.log("CLICKED: LOW HOURS");
+
+  const listEl = document.getElementById("lowHourList");
+
+  if(!listEl){
+    console.error("lowHourList container missing");
+    return;
+  }
+
+  listEl.innerHTML = "<p>Loading...</p>";
+
+  // 1. Fetch data
+  const { data: students, error: studentError } = await supabaseClient
+    .from("students")
+    .select("student_id, first_name, last_name");
+
+  const { data: sessions, error: sessionError } = await supabaseClient
+    .from("sessions")
+    .select("student_id, minutes");
+
+  if(studentError || !students){
+    console.log("Student error:", studentError);
+    return;
+  }
+
+  if(sessionError || !sessions){
+    console.log("Session error:", sessionError);
+    return;
+  }
+
+  console.log("STUDENTS:", students);
+  console.log("SESSIONS:", sessions);
+
+  // 2. Build session map (SAFE)
+  const sessionMap = {};
+
+  sessions.forEach(s => {
+
+    const min = Number(s.minutes);
+
+    if (!sessionMap[s.student_id]) {
+      sessionMap[s.student_id] = 0;
+    }
+
+    // only add valid minutes
+    if (!isNaN(min) && min > 0) {
+      sessionMap[s.student_id] += min;
+    }
+  });
+
+  // 3. Render list
+  let html = "";
+
+  students.forEach(st => {
+
+    const totalMin = sessionMap[st.student_id] || 0;
+
+    const remaining = Math.max(0, 600 - totalMin); // 10 hours = 600 mins
+
+    const sessionsDone =
+      sessions.filter(s => s.student_id === st.student_id && Number(s.minutes) > 0).length;
+
+    // 🔥 FILTER: ONLY LOW REMAINING HOURS
+    if (!(remaining > 0 && remaining <= 120)) return;
+
+    html += `
+      <div class="glass p-3 mb-2">
+        <div style="font-weight:600;">
+          ${st.first_name} ${st.last_name}
+        </div>
+
+        <div class="row-line">
+          <span>Sessions: ${sessionsDone}</span>
+        </div>
+
+        <div class="row-line">
+          <span>Covered: ${format(totalMin)} hrs</span>
+        </div>
+
+        <div class="row-line">
+          <span>Remaining: ${format(remaining)} hrs</span>
+        </div>
+      </div>
+    `;
+  });
+
+  listEl.innerHTML = html || "<p>No students with ≤ 2 hours remaining</p>";
+}
+
+/* ================= NON ACTIVE STUDENTS ================= */
+async function showInactiveStudents(){
+
+  clearStudentLists();
+  
+  const listEl = document.getElementById("inactiveList");
+
+  if(!listEl){
+    console.error("inactiveList container missing");
+    return;
+  }
+
+  listEl.innerHTML = "<p>Loading...</p>";
+
+  // 1. Fetch students
+  const { data: students, error: studentError } = await supabaseClient
+    .from("students")
+    .select("student_id, first_name, last_name, date_enrolled");
+
+  // 2. Fetch sessions
+  const { data: sessions, error: sessionError } = await supabaseClient
+    .from("sessions")
+    .select("student_id, minutes");
+
+  if(studentError || !students){
+    console.log("Student error:", studentError);
+    return;
+  }
+
+  if(sessionError || !sessions){
+    console.log("Session error:", sessionError);
+    return;
+  }
+
+  // 3. Build session map
+  const sessionMap = {};
+
+  sessions.forEach(s => {
+    const min = Number(s.minutes);
+    if(!isNaN(min) && min > 0){
+      sessionMap[s.student_id] =
+        (sessionMap[s.student_id] || 0) + min;
+    }
+  });
+
+  // 4. Render inactive students
+  let html = "";
+
+  students.forEach(st => {
+
+    const totalMin = sessionMap[st.student_id] || 0;
+
+    // 🔥 ONLY inactive students
+    if(totalMin > 0) return;
+
+    html += `
+      <div class="glass p-3 mb-2">
+        <div style="font-weight:600;">
+          ${st.first_name} ${st.last_name}
+        </div>
+
+        <div class="row-line">
+          <span class="icon-box">📅</span>
+          <span>Enrolled: ${st.date_enrolled || "N/A"}</span>
+        </div>
+
+        <div class="row-line">
+          <span class="icon-box">⏳</span>
+          <span>No sessions yet</span>
+        </div>
+      </div>
+    `;
+  });
+
+  listEl.innerHTML = html || "<p>No inactive students 🎉</p>";
+}
+
+/* ================= CANCEL ================= */
+function cancel(){
+  document.getElementById("date").value="";
+  document.getElementById("start").value="";
+  document.getElementById("end").value="";
+
+  bootstrap.Modal.getInstance(document.getElementById("modal")).hide();
+}
+
+/* ================= REFRESH DASHBOARD ================= */
+async function refreshDashboard() {
+  console.log("🔄 REFRESH DASHBOARD CALLED");
+
+  try {
+
+    // 1. Refresh HOME KPIs
+    await updateHome();
+
+    // 2. Refresh Students analytics (students page tiles)
+    await loadStudentAnalytics();
+
+    // 3. If sessions dropdown exists → refresh it
+    const studentId = document.getElementById("studentSelect")?.value;
+
+    if (studentId) {
+      await loadSummary(studentId);
+      await loadSessions(studentId);
+    }
+
+    console.log("✅ DASHBOARD REFRESH COMPLETE");
+
+  } catch (err) {
+    console.log("REFRESH ERROR:", err);
+  }
+}
+
+/* ================= CLOSE EDIT MODAL ================= */
+function closeEditModal() {
+  document.getElementById("editModal").style.display = "none";
+}
+
+
+/* ================= ADD STUDENT MODAL ================= */
+function openAddStudentForm(){
+  document.getElementById("addStudentModal").style.display = "flex";
+}
+
+function closeAddStudentForm(){
+  document.getElementById("addStudentModal").style.display = "none";
+
+  document.getElementById("firstName").value = "";
+  document.getElementById("lastName").value = "";
+  document.getElementById("dateEnrolled").value = "";
+}
+
+/* ================= SAVE STUDENT ================= */
+async function submitStudent(){
+
+  const first_name = document.getElementById("firstName").value.trim();
+  const last_name = document.getElementById("lastName").value.trim();
+  const date_enrolled = document.getElementById("dateEnrolled").value.trim();
+
+  if(!first_name || !last_name){
+    alert("First name and Last name are required");
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from("students")
+    .insert([{
+      first_name,
+      last_name,
+      date_enrolled
+    }])
+    .select();
+
+  if(error){
+    console.log("INSERT ERROR:", error);
+    alert("Failed to add student");
+    return;
+  }
+
+  console.log("STUDENT ADDED:", data);
+
+  closeAddStudentForm();
+
+  // refresh UI
+  updateHome();
+  loadStudentAnalytics();
+}
+
+/* ================= GENERATE BILLING PERIODS ================= */
+function generateBillingPeriods(monthsBack = 12){
+
+  const periods = [];
+  const today = new Date();
+
+  // start from current month going backwards
+  for(let i = 0; i < monthsBack; i++){
+
+    let refDate = new Date(today.getFullYear(), today.getMonth() - i, 1);
+
+    let year = refDate.getFullYear();
+    let month = refDate.getMonth();
+
+    // Billing cycle: 20th of previous month → 19th of current month
+    let start = new Date(year, month - 1, 20);
+    let end = new Date(year, month, 19);
+
+    // format display
+    const label = `${formatDateShort(start)} - ${formatDateShort(end)}`;
+
+    periods.push({
+      label,
+      start,
+      end,
+      value: `${start.toISOString()}|${end.toISOString()}`
+    });
+  }
+
+  return periods;
+}
+
+/* ================= LOAD BILLING PERIOD DROPDOWN ================= */
+function loadBillingPeriods(){
+
+  const select = document.getElementById("billingPeriodSelect");
+
+  if(!select) return;
+
+  const periods = generateBillingPeriods(12);
+
+  let html = `<option value="">Select Billing Period</option>`;
+
+  periods.forEach(p => {
+    html += `<option value="${p.value}">
+      ${p.label}
+    </option>`;
+  });
+
+  select.innerHTML = html;
+}
+
+/* ================= BILLING PERIOD CHANGE ================= */
+async function onBillingPeriodChange(){
+
+  const value = document.getElementById("billingPeriodSelect").value;
+
+  if(!value) return;
+
+  const [startISO, endISO] = value.split("|");
+
+  const startDate = new Date(startISO);
+  const endDate = new Date(endISO);
+
+  await loadBillingData(startDate, endDate);
+}
+
+/* ================= UTIL ================= */
+
+/* ================= FORMAT DATE (DD MMM YYYY) ================= */
+function formatDateShort(date){
+
+  const months = ["Jan","Feb","Mar","Apr","May","Jun",
+                  "Jul","Aug","Sep","Oct","Nov","Dec"];
+
+  return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+}
+
+function diff(a,b){
+  return (new Date("1970-01-01T"+b)-new Date("1970-01-01T"+a))/60000;
+}
+
+function format(m){
+  let h=Math.floor(Math.abs(m)/60);
+  let mm=Math.abs(m)%60;
+  return `${h.toString().padStart(2,'0')}:${mm.toString().padStart(2,'0')}`;
+}
+
+function toAMPM(timeStr){
+
+  if(!timeStr) return "";
+
+  let [hourStr, minute] = timeStr.split(":");
+
+  let hour = parseInt(hourStr);
+
+  const ampm = hour >= 12 ? "PM" : "AM";
+
+  hour = hour % 12;
+  if(hour === 0) hour = 12;
+
+  return `${hour}:${minute} ${ampm}`;
+}
+
+function formatDateDMY(dateStr){
+
+  if(!dateStr) return "";
+
+  // treat as plain date, NOT UTC conversion
+  const [year, month, day] = dateStr.split("-");
+
+  const months = [
+    "Jan","Feb","Mar","Apr","May","Jun",
+    "Jul","Aug","Sep","Oct","Nov","Dec"
+  ];
+
+  return `${day}-${months[parseInt(month)-1]}-${year}`;
+}
+
+/* ================= SAFE MINUTES PARSER ================= */
+function safeMinutes(m){
+  const n = Number(m);
+  return isNaN(n) ? 0 : n;
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- ================= EDIT MODAL ================= -->
+<div id="editModal" style="
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.4);
+  z-index:9999;
+">
+
+  <div style="
+    background:white;
+    width:300px;
+    padding:20px;
+    border-radius:12px;
+    margin:auto;
+    margin-top:100px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.2);
+  ">
+
+    <h4 style="margin-bottom:15px;">Edit Session</h4>
+
+    <label>Date</label>
+    <input id="editDate" type="date" class="form-control mb-2">
+
+    <label>Start Time</label>
+    <input id="editStart" type="time" class="form-control mb-2">
+
+    <label>End Time</label>
+    <input id="editEnd" type="time" class="form-control mb-2">
+
+    <div class="d-flex justify-content-between mt-3">
+
+      <button class="btn btn-secondary btn-sm" onclick="closeEditModal()">
+        Cancel
+      </button>
+
+      <button class="btn btn-primary btn-sm" onclick="saveEdit()">
+        Save
+      </button>
+
+    </div>
+
+  </div>
+</div>
+<div id="sessionForm" class="session-modal">
+
+  <div class="session-card">
+
+    <h2>Add Session</h2>
+
+    <div class="form-group">
+      <label>Date</label>
+      <input type="date" id="sessionDate">
+    </div>
+
+    <div class="form-group">
+      <label>Start Time</label>
+      <input type="time" id="startTime">
+    </div>
+
+    <div class="form-group">
+      <label>End Time</label>
+      <input type="time" id="endTime">
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-primary" onclick="submitSession()">Save</button>
+      <button class="btn-secondary" onclick="closeSessionForm()">Cancel</button>
+    </div>
+
+  </div>
+
+</div>
+
+<div id="addStudentModal" class="session-modal" style="display:none;">
+
+  <div class="session-card">
+
+    <h2>Add Student</h2>
+
+    <div class="form-group">
+      <label>First Name</label>
+      <input type="text" id="firstName">
+    </div>
+
+    <div class="form-group">
+      <label>Last Name</label>
+      <input type="text" id="lastName">
+    </div>
+
+    <div class="form-group">
+      <label>Date Enrolled / Notes</label>
+      <input type="text" id="dateEnrolled" placeholder="e.g. 2026-01-10 OR Online Theory">
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-primary" onclick="submitStudent()">Save</button>
+      <button class="btn-secondary" onclick="closeAddStudentForm()">Cancel</button>
+    </div>
+
+  </div>
+
+</div>
+
+</body>
+</html>
